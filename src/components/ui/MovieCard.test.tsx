@@ -1,11 +1,27 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { useRouter } from "next/navigation";
 import MovieCard from "./MovieCard";
 import { MovieListingItem } from "@/types/movieListing";
 
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+}));
+
 jest.mock("@/utils/movie", () => ({
   formatVoteAverage: jest.fn((rating: number) => rating.toFixed(1)),
-  formatReleaseDate: jest.fn((date: string) => "January 1, 2025"),
+  formatReleaseDate: jest.fn((date: string) => `Formatted: ${date}`),
 }));
+
+const mockPush = jest.fn();
+const mockRouter = {
+  push: mockPush,
+  back: jest.fn(),
+  forward: jest.fn(),
+  refresh: jest.fn(),
+  replace: jest.fn(),
+};
+
+(useRouter as jest.Mock).mockReturnValue(mockRouter);
 
 const mockMovie: MovieListingItem = {
   id: 123,
@@ -26,6 +42,10 @@ const mockMovie: MovieListingItem = {
 };
 
 describe("MovieCard", () => {
+  beforeEach(() => {
+    mockPush.mockClear();
+  });
+
   it("renders movie title correctly", () => {
     render(<MovieCard movie={mockMovie} />);
     expect(screen.getByText("Test Movie")).toBeInTheDocument();
@@ -48,7 +68,7 @@ describe("MovieCard", () => {
 
   it("displays popularity score", () => {
     render(<MovieCard movie={mockMovie} />);
-    expect(screen.getByText("Popularity: 101")).toBeInTheDocument(); // Math.round(100.5) = 101
+    expect(screen.getByText("Popularity: 101")).toBeInTheDocument();
   });
 
   it("renders poster image when poster_path exists", () => {
@@ -67,17 +87,35 @@ describe("MovieCard", () => {
     expect(screen.getByText("No Image")).toBeInTheDocument();
   });
 
-  it("applies hover effect classes", () => {
+  it("navigates to movie detail when clicked", () => {
+    render(<MovieCard movie={mockMovie} />);
+    const card = screen.getByText("Test Movie").closest("div");
+
+    fireEvent.click(card!);
+
+    expect(mockPush).toHaveBeenCalledWith("/movie/123");
+  });
+
+  it("has cursor pointer and hover effects", () => {
     const { container } = render(<MovieCard movie={mockMovie} />);
     const cardElement = container.firstChild;
-    expect(cardElement).toHaveClass("hover:shadow-lg", "transition-shadow");
+    expect(cardElement).toHaveClass(
+      "cursor-pointer",
+      "hover:shadow-lg",
+      "hover:scale-105"
+    );
   });
 
   it("handles missing overview gracefully", () => {
     const movieWithoutOverview = { ...mockMovie, overview: "" };
     render(<MovieCard movie={movieWithoutOverview} />);
     expect(screen.getByText("Test Movie")).toBeInTheDocument();
-    // Overview section should not be rendered when empty
     expect(screen.queryByText(mockMovie.overview)).not.toBeInTheDocument();
+  });
+
+  it("handles loading attribute on image", () => {
+    render(<MovieCard movie={mockMovie} />);
+    const image = screen.getByAltText("Test Movie");
+    expect(image).toHaveAttribute("loading", "lazy");
   });
 });

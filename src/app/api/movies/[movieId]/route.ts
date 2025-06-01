@@ -5,9 +5,9 @@ const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = process.env.TMDB_BASE_URL;
 
 interface MovieDetailsParams {
-  params: {
+  params: Promise<{
     movieId: string;
-  };
+  }>;
 }
 
 export async function GET(
@@ -21,7 +21,7 @@ export async function GET(
     );
   }
 
-  const { movieId } = params;
+  const { movieId } = await params;
   const movieIdNum = parseInt(movieId, 10);
   if (!movieId || isNaN(movieIdNum) || movieIdNum <= 0) {
     return NextResponse.json({ error: "Invalid movie ID" }, { status: 400 });

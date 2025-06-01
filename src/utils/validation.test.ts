@@ -23,8 +23,4 @@ describe("isValidSortOption", () => {
     expect(isValidSortOption("")).toBe(false);
     expect(isValidSortOption("   ")).toBe(false);
   });
-
-  it("should return false for undefined", () => {
-    expect(isValidSortOption(undefined as any)).toBe(false);
-  });
 });

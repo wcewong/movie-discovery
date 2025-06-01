@@ -91,7 +91,7 @@ export default function Home() {
             {!hasNextPage && !isFetchingNextPage && (
               <div className="text-center mt-8 py-6">
                 <div className="text-gray-500 text-sm">
-                  🎬 You've reached the end!
+                  🎬 You&apos;ve reached the end!
                 </div>
                 <div className="text-gray-400 text-xs mt-1">
                   Found {movies.length} movies

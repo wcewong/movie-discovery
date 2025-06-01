@@ -8,7 +8,7 @@ export interface MovieListing {
 export interface MovieListingItem {
   adult: boolean;
   backdrop_path: string | null;
-  genre_ids: any[];
+  genre_ids: number[];
   id: number;
   original_language: string;
   original_title: string;

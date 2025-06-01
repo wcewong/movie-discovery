@@ -64,7 +64,7 @@ describe("APIClient", () => {
         "title.desc",
         "vote_average.asc",
         "vote_average.desc",
-      ];
+      ] as const;
 
       for (const sortBy of sortOptions) {
         mockFetch.mockResolvedValueOnce({
@@ -72,7 +72,7 @@ describe("APIClient", () => {
           json: async () => mockResponse,
         } as Response);
 
-        await apiClient.getMovies({ sortBy: sortBy as any });
+        await apiClient.getMovies({ sortBy });
 
         expect(mockFetch).toHaveBeenCalledWith(
           expect.stringContaining(`sort_by=${sortBy}`)
@@ -160,8 +160,7 @@ describe("APIClient", () => {
 
   describe("URL construction", () => {
     it("should use environment variable for base URL", () => {
-      // test that constructor uses the environment variable
-      expect(apiClient["baseURL"]).toBe("/api"); // Default fallback
+      expect(apiClient["baseURL"]).toBe("/api"); // default fallback
     });
 
     it("should construct URLs correctly with base URL", async () => {
@@ -192,7 +191,6 @@ describe("movieApi exports", () => {
       json: async () => mockResponse,
     } as Response);
 
-    // Test that destructured methods work (this tests the .bind() calls)
     const { getMovies } = movieApi;
     const result = await getMovies({ sortBy: "release_date.desc" });
 

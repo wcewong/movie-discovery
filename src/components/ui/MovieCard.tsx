@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { MovieListingItem } from "@/types/movieListing";
 import { formatVoteAverage, formatReleaseDate } from "@/utils/movie";
 
@@ -6,8 +9,17 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ movie }: MovieCardProps) {
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    router.push(`/movie/${movie.id}`);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
+    <div
+      onClick={handleCardClick}
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer transform hover:scale-105"
+    >
       {/* poster placeholder */}
       <div className="aspect-[2/3] bg-gray-200 relative">
         {movie.poster_path ? (
@@ -15,6 +27,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
             src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
             alt={movie.title}
             className="w-full h-full object-cover"
+            loading="lazy"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -30,7 +43,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
 
       {/* movie info */}
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 text-lg mb-2 text-clamp-2">
+        <h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-2">
           {movie.title}
         </h3>
 
@@ -43,7 +56,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
         </p>
 
         {movie.overview && (
-          <p className="text-gray-600 text-sm mt-2 text-clamp-3">
+          <p className="text-gray-600 text-sm mt-2 line-clamp-3">
             {movie.overview}
           </p>
         )}
