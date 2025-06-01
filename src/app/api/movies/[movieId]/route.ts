@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { buildTMDBUrl, TMDB_ENDPOINTS } from "@/constants/apiEndpoints";
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = process.env.TMDB_BASE_URL;
@@ -31,15 +32,15 @@ export async function GET(
   });
 
   try {
-    const response = await fetch(
-      `${TMDB_BASE_URL}/movie/${movieId}?${tmdbParams.toString()}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        next: { revalidate: 1800 }, // cache for 30 mins
-      }
-    );
+    const endpoint = TMDB_ENDPOINTS.MOVIE_DETAIL(movieIdNum);
+    const url = buildTMDBUrl(endpoint, TMDB_BASE_URL);
+
+    const response = await fetch(`${url}?${tmdbParams.toString()}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      next: { revalidate: 1800 }, // cache for 30 mins
+    });
 
     if (!response.ok) {
       if (response.status === 404) {

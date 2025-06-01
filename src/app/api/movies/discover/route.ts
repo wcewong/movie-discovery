@@ -2,6 +2,7 @@ import { DEFAULT_SORT } from "@/constants/movieSorts";
 import { isValidSortOption } from "@/utils/validation";
 import { SortOption } from "@/types/sortOptions";
 import { NextRequest, NextResponse } from "next/server";
+import { buildTMDBUrl, TMDB_ENDPOINTS } from "@/constants/apiEndpoints";
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = process.env.TMDB_BASE_URL;
@@ -30,15 +31,15 @@ export async function GET(request: NextRequest) {
   });
 
   try {
-    const response = await fetch(
-      `${TMDB_BASE_URL}/discover/movie?${tmdbParams.toString()}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        next: { revalidate: 600 }, // cache for 10 minutes
-      }
-    );
+    const endpoint = TMDB_ENDPOINTS.DISCOVER_MOVIE;
+    const url = buildTMDBUrl(endpoint, TMDB_BASE_URL);
+
+    const response = await fetch(`${url}?${tmdbParams.toString()}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      next: { revalidate: 600 }, // cache for 10 minutes
+    });
 
     if (!response.ok) {
       throw new Error(`TMDB API error: ${response.status}`);

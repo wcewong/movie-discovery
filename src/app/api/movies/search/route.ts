@@ -1,3 +1,4 @@
+import { buildTMDBUrl, TMDB_ENDPOINTS } from "@/constants/apiEndpoints";
 import { NextRequest, NextResponse } from "next/server";
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
@@ -36,15 +37,15 @@ export async function GET(request: NextRequest) {
   });
 
   try {
-    const response = await fetch(
-      `${TMDB_BASE_URL}/search/movie?${tmdbParams.toString()}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        next: { revalidate: 300 }, // cache for 5 mins
-      }
-    );
+    const endpoint = TMDB_ENDPOINTS.SEARCH_MOVIE;
+    const url = buildTMDBUrl(endpoint, TMDB_BASE_URL);
+
+    const response = await fetch(`${url}?${tmdbParams.toString()}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      next: { revalidate: 300 }, // cache for 5 mins
+    });
 
     if (!response.ok) {
       throw new Error(`TMDB API error: ${response.status}`);
