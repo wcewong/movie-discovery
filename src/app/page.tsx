@@ -1,103 +1,116 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import ScrollHeader from "@/components/features/ScrollHeader";
+import MovieCard from "@/components/ui/MovieCard";
+import { useMovies } from "@/hooks/useMovies";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { SortOption } from "@/types/sortOptions";
+import { DEFAULT_SORT } from "@/constants/movieSorts";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [sortBy, setSortBy] = useState<SortOption>(DEFAULT_SORT);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useMovies(sortBy);
+
+  // get movies from the paginated structure and deduplicate
+  const allMovies = data?.pages.flatMap((page) => page.results) ?? [];
+  const movies = allMovies.filter(
+    (movie, index, self) => index === self.findIndex((m) => m.id === movie.id)
+  );
+
+  // infinite scroll hook
+  const { lastElementRef } = useInfiniteScroll({
+    hasNextPage: !!hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    threshold: 800,
+  });
+
+  const handleSortChange = (newSortBy: SortOption) => {
+    setSortBy(newSortBy);
+  };
+
+  if (error) {
+    return (
+      <>
+        <ScrollHeader sortBy={sortBy} onSortChange={handleSortChange} />
+        <div className="pt-24 pb-8 px-6">
+          <div className="text-center py-8">
+            <p className="text-red-600">
+              Error loading movies: {(error as Error).message}
+            </p>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <ScrollHeader sortBy={sortBy} onSortChange={handleSortChange} />
+
+      <div className="pt-24 pb-8 px-6">
+        {isLoading && (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading movies...</p>
+          </div>
+        )}
+
+        {movies.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {movies.map((movie, index) => {
+                const isLastItem = index === movies.length - 1;
+                return (
+                  <div
+                    key={`${movie.id}-${index}`}
+                    ref={isLastItem ? lastElementRef : null}
+                  >
+                    <MovieCard movie={movie} />
+                  </div>
+                );
+              })}
+            </div>
+
+            {isFetchingNextPage && (
+              <div className="text-center mt-8 py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-gray-600 text-sm">Loading more movies...</p>
+              </div>
+            )}
+
+            {!hasNextPage && !isFetchingNextPage && (
+              <div className="text-center mt-8 py-6">
+                <div className="text-gray-500 text-sm">
+                  🎬 You've reached the end!
+                </div>
+                <div className="text-gray-400 text-xs mt-1">
+                  Found {movies.length} movies
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {!isLoading && movies.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">🎬</div>
+            <p className="text-gray-600 text-lg mb-2">No movies found</p>
+            <p className="text-gray-500 text-sm">
+              Try adjusting your filters or check back later
+            </p>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

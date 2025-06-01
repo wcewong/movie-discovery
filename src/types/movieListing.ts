@@ -14,8 +14,8 @@ export interface MovieListingItem {
   original_title: string;
   overview: string;
   popularity: number;
-  poster_path: string;
-  release_date: Date;
+  poster_path: string | null;
+  release_date: string;
   title: string;
   video: boolean;
   vote_average: number;
