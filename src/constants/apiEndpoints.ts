@@ -1,14 +1,12 @@
 export const API_ENDPOINTS = {
   MOVIES: {
     DISCOVER: "/movies/discover",
-    SEARCH: "/movies/search",
     DETAIL: (movieId: number) => `/movies/${movieId}`,
   },
 } as const;
 
 export const TMDB_ENDPOINTS = {
   DISCOVER_MOVIE: "/discover/movie",
-  SEARCH_MOVIE: "/search/movie",
   MOVIE_DETAIL: (movieId: number) => `/movie/${movieId}`,
 } as const;
 

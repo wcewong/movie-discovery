@@ -10,8 +10,6 @@ export const movieQueryKeys = {
   list: (sortBy: SortOption) => [...movieQueryKeys.lists(), sortBy] as const,
   details: () => [...movieQueryKeys.all, "detail"] as const,
   detail: (id: number) => [...movieQueryKeys.details(), id] as const,
-  searches: () => [...movieQueryKeys.all, "search"] as const,
-  search: (query: string) => [...movieQueryKeys.searches(), query] as const,
 };
 
 export const useMovies = (sortBy: SortOption = DEFAULT_SORT) => {
@@ -38,27 +36,5 @@ export const useMovieDetail = (movieId: number | null) => {
     enabled: !!movieId && movieId > 0,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
-  });
-};
-
-export const useSearchMovies = (
-  query: string,
-  options?: { enabled?: boolean }
-) => {
-  const { enabled = true } = options || {};
-
-  return useInfiniteQuery({
-    queryKey: movieQueryKeys.search(query),
-    queryFn: ({ pageParam = 1 }) => movieApi.searchMovies(query, pageParam),
-    getNextPageParam: (lastPage) => {
-      if (lastPage.page < lastPage.total_pages) {
-        return lastPage.page + 1;
-      }
-      return undefined;
-    },
-    initialPageParam: 1,
-    enabled: enabled && query.trim().length > 0,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
 };

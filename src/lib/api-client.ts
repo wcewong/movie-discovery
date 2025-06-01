@@ -54,14 +54,6 @@ class APIClient {
   async getMovieDetail(movieId: number): Promise<MovieDetail> {
     return this.request<MovieDetail>(API_ENDPOINTS.MOVIES.DETAIL(movieId));
   }
-
-  // search movies with pagination
-  async searchMovies(query: string, page: number = 1): Promise<MovieListing> {
-    return this.request<MovieListing>(API_ENDPOINTS.MOVIES.SEARCH, {
-      query,
-      page: page.toString(),
-    });
-  }
 }
 
 export const apiClient = new APIClient();
@@ -69,5 +61,4 @@ export const apiClient = new APIClient();
 export const movieApi = {
   getMovies: apiClient.getMovies.bind(apiClient),
   getMovieDetail: apiClient.getMovieDetail.bind(apiClient),
-  searchMovies: apiClient.searchMovies.bind(apiClient),
 };

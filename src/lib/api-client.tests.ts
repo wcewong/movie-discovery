@@ -118,59 +118,6 @@ describe("APIClient", () => {
     });
   });
 
-  describe("searchMovies", () => {
-    it("should search movies with correct URL and parameters", async () => {
-      const mockResponse = {
-        page: 1,
-        results: [{ id: 1, title: "Batman" }],
-        total_pages: 5,
-        total_results: 50,
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response);
-
-      const result = await apiClient.searchMovies("transformers", 2);
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        "http://localhost:3377/api/movies/search?query=transformers&page=2"
-      );
-      expect(result).toEqual(mockResponse);
-    });
-
-    it("should use default page when not provided", async () => {
-      const mockResponse = { page: 1, results: [] };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response);
-
-      await apiClient.searchMovies("test");
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        "http://localhost:3377/api/movies/search?query=test&page=1"
-      );
-    });
-
-    it("should handle special characters in search query", async () => {
-      const mockResponse = { page: 1, results: [] };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response);
-
-      await apiClient.searchMovies("spider-man & friends");
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        "http://localhost:3377/api/movies/search?query=spider-man+%26+friends&page=1"
-      );
-    });
-  });
-
   describe("error handling", () => {
     it("should throw error when response is not ok", async () => {
       const errorResponse = { error: "Movie not found" };
@@ -258,10 +205,8 @@ describe("movieApi exports", () => {
   it("should have all expected methods in movieApi", () => {
     expect(movieApi).toHaveProperty("getMovies");
     expect(movieApi).toHaveProperty("getMovieDetail");
-    expect(movieApi).toHaveProperty("searchMovies");
 
     expect(typeof movieApi.getMovies).toBe("function");
     expect(typeof movieApi.getMovieDetail).toBe("function");
-    expect(typeof movieApi.searchMovies).toBe("function");
   });
 });
