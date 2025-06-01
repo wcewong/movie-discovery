@@ -21,10 +21,8 @@ export default function ScrollHeader({
       const currentScrollY = window.scrollY;
 
       if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        // scrolling down - hide completely
         setIsVisible(false);
       } else if (currentScrollY < lastScrollY) {
-        // scrolling up - show
         setIsVisible(true);
       }
 
@@ -35,6 +33,13 @@ export default function ScrollHeader({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  const handleLogoClick = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-transform duration-300 ease-in-out h-20 ${
@@ -42,7 +47,12 @@ export default function ScrollHeader({
       }`}
     >
       <div className="flex items-center justify-between px-6 h-full">
-        <div className="font-bold text-xl text-black flex-shrink-0">LOGO</div>
+        <button
+          onClick={handleLogoClick}
+          className="font-bold text-xl text-black flex-shrink-0 hover:text-blue-600 transition-colors cursor-pointer"
+        >
+          LOGO
+        </button>
 
         <div className="flex items-center space-x-4">
           <nav className="transition-opacity duration-300"></nav>
