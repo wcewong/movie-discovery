@@ -1,0 +1,83 @@
+import { render, screen } from "@testing-library/react";
+import MovieCard from "./MovieCard";
+import { MovieListingItem } from "@/types/movieListing";
+
+jest.mock("@/utils/movie", () => ({
+  formatVoteAverage: jest.fn((rating: number) => rating.toFixed(1)),
+  formatReleaseDate: jest.fn((date: string) => "January 1, 2025"),
+}));
+
+const mockMovie: MovieListingItem = {
+  id: 123,
+  title: "Test Movie",
+  overview:
+    "This is a test movie description that should be displayed on the card.",
+  poster_path: "/test-poster.jpg",
+  backdrop_path: "/test-backdrop.jpg",
+  release_date: "2025-01-01",
+  vote_average: 8.5,
+  vote_count: 1000,
+  popularity: 100.5,
+  adult: false,
+  genre_ids: [1, 2, 3],
+  original_language: "en",
+  original_title: "Test Movie Original",
+  video: false,
+};
+
+describe("MovieCard", () => {
+  it("renders movie title correctly", () => {
+    render(<MovieCard movie={mockMovie} />);
+    expect(screen.getByText("Test Movie")).toBeInTheDocument();
+  });
+
+  it("renders movie overview", () => {
+    render(<MovieCard movie={mockMovie} />);
+    expect(screen.getByText(mockMovie.overview)).toBeInTheDocument();
+  });
+
+  it("displays formatted vote average", () => {
+    render(<MovieCard movie={mockMovie} />);
+    expect(screen.getByText("⭐ 8.5")).toBeInTheDocument();
+  });
+
+  it("displays formatted release date", () => {
+    render(<MovieCard movie={mockMovie} />);
+    expect(screen.getByText("January 1, 2025")).toBeInTheDocument();
+  });
+
+  it("displays popularity score", () => {
+    render(<MovieCard movie={mockMovie} />);
+    expect(screen.getByText("Popularity: 101")).toBeInTheDocument(); // Math.round(100.5) = 101
+  });
+
+  it("renders poster image when poster_path exists", () => {
+    render(<MovieCard movie={mockMovie} />);
+    const image = screen.getByAltText("Test Movie");
+    expect(image).toBeInTheDocument();
+    expect(image).toHaveAttribute(
+      "src",
+      "https://image.tmdb.org/t/p/w300/test-poster.jpg"
+    );
+  });
+
+  it('shows "No Image" when poster_path is null', () => {
+    const movieWithoutPoster = { ...mockMovie, poster_path: null };
+    render(<MovieCard movie={movieWithoutPoster} />);
+    expect(screen.getByText("No Image")).toBeInTheDocument();
+  });
+
+  it("applies hover effect classes", () => {
+    const { container } = render(<MovieCard movie={mockMovie} />);
+    const cardElement = container.firstChild;
+    expect(cardElement).toHaveClass("hover:shadow-lg", "transition-shadow");
+  });
+
+  it("handles missing overview gracefully", () => {
+    const movieWithoutOverview = { ...mockMovie, overview: "" };
+    render(<MovieCard movie={movieWithoutOverview} />);
+    expect(screen.getByText("Test Movie")).toBeInTheDocument();
+    // Overview section should not be rendered when empty
+    expect(screen.queryByText(mockMovie.overview)).not.toBeInTheDocument();
+  });
+});
